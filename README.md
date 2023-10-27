@@ -14,8 +14,9 @@ Mandatory exercise 2 for Artificial Intelligence for Energy Informatics.
 
 ## Datasets
 * **[Dataset.csv:](https://zenodo.org/records/6778401)** Attention! There are two links to datasets in the docs. We are using the one which can be found on zenodo.org
-* 
+*
 
 
 ## Useful tutorials
 * **[lstm example](https://colab.research.google.com/github/dlmacedo/starter-academic/blob/master/content/courses/deeplearning/notebooks/pytorch/Time_Series_Prediction_with_LSTM_Using_PyTorch.ipynb#scrollTo=CKEzO1jzKydL)** a jupyter notebook with a time series prediction example using lstm
+* **[rnn vs lstm vs gru code](https://www.tertiaryinfotech.com/comparison-of-lstm-gru-and-rnn-on-time-series-forecasting-with-pytorch/)** architectures of the three different models
