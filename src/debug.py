@@ -2,7 +2,7 @@ from src.load_data import get_data
 from src.train import FederatedLearning
 from src.config import Config
 
-STACKED = False
+STACKED = True  # aggregate all households to one
 
 
 def main():

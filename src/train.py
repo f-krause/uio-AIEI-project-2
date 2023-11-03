@@ -1,5 +1,6 @@
 import torch
 import time
+import numpy as np
 from matplotlib import pyplot as plt
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 
@@ -40,7 +41,7 @@ class FederatedLearning:
 
         start_time = time.time()
         # Train the model
-        for epoch in range(self.config.epochs):
+        for epoch in range(1, self.config.epochs+1):
             self.optimizer.zero_grad()
             self.train_losses.append([epoch, 0.])
 
@@ -63,7 +64,7 @@ class FederatedLearning:
                 p.grad = p.grad / nr_households
 
             self.optimizer.step()
-            if epoch % self.config.eval_steps == 0 or epoch == self.config.epochs - 1:
+            if epoch == 1 or epoch % self.config.eval_steps == 0:
                 with torch.no_grad():
                     # y-pred from (H, N, L) -> (H * N, L)
                     y_pred = self.model(x_val.reshape(-1, x_val.shape[-1]))
@@ -91,33 +92,36 @@ class FederatedLearning:
         plt.show()
 
     def evaluate(self, x_test, y_test):
+        self.model.eval()
         y_pred = self.model(x_test.reshape(-1, x_test.shape[-1]))
         y_test = y_test.reshape(-1, 1)
         if self.config.mode.lower() == "prediction":
-            # Loss
-            print("Test MSE:", self.criterion(y_test, y_pred))
+            print("Test MSE:", self.criterion(y_test, y_pred).item())
         elif self.config.mode.lower() == "classification":
-            # Loss
-            print("Test cross entropy:", self.criterion(y_test, y_pred))
-            print("--------------------")
+            y_test = y_test.long().squeeze()
+            test_loss = self.criterion(y_pred, y_test).item()
 
             # Confusion matrix
-            print(confusion_matrix(y_test, y_pred))
+            y_pred = y_pred.argmax(dim=1)
+            labels = ['AC', 'Dish washer', 'Washing Machine', 'Dryer', 'Water heater', 'TV', 'Microwave', 'Kettle',
+                      'Lighting', 'Refrigerator']
+            print(confusion_matrix(y_test, y_pred, labels=labels))
             print("--------------------")
 
             # Metrics
             accuracy = accuracy_score(y_test, y_pred)
-            precision_micro = precision_score(y_test, y_pred, average='micro')
-            recall_micro = recall_score(y_test, y_pred, average='micro')
-            f1_micro = f1_score(y_test, y_pred, average='micro')
+            precision_micro = precision_score(y_test, y_pred, average='micro', zero_division=np.nan)
+            recall_micro = recall_score(y_test, y_pred, average='micro', zero_division=np.nan)
+            f1_micro = f1_score(y_test, y_pred, average='micro', zero_division=np.nan)
 
-            precision_macro = precision_score(y_test, y_pred, average='macro')
-            recall_macro = recall_score(y_test, y_pred, average='macro')
-            f1_macro = f1_score(y_test, y_pred, average='macro')
-            print("Accuracy:", accuracy)
-            print("Precision (micro):", precision_micro)
-            print("Recall (micro):", recall_micro)
-            print("F1 Score (micro):", f1_micro)
-            print("Precision (macro):", precision_macro)
-            print("Recall (macro):", recall_macro)
-            print("F1 Score (macro):", f1_macro)
+            precision_macro = precision_score(y_test, y_pred, average='macro', zero_division=np.nan)
+            recall_macro = recall_score(y_test, y_pred, average='macro', zero_division=np.nan)
+            f1_macro = f1_score(y_test, y_pred, average='macro', zero_division=np.nan)
+            print("Test cross entropy:", round(test_loss, 4))
+            print("Accuracy:          ", round(accuracy, 4))
+            print("Precision (micro): ", round(precision_micro, 4))
+            print("Recall (micro):    ", round(recall_micro, 4))
+            print("F1 Score (micro):  ", round(f1_micro, 4))
+            print("Precision (macro): ", round(precision_macro, 4))
+            print("Recall (macro):    ", round(recall_macro, 4))
+            print("F1 Score (macro):  ", round(f1_macro, 4))
