@@ -39,8 +39,8 @@ class FederatedLearning:
         if self.config.mode == "classification":
             y_train, y_val = y_train.long(), y_val.long()
 
-        start_time = time.time()
         # Train the model
+        start_time = time.time()
         for epoch in range(1, self.config.epochs+1):
             self.optimizer.zero_grad()
             self.train_losses.append([epoch, 0.])
@@ -62,8 +62,9 @@ class FederatedLearning:
             self.train_losses[-1][1] = self.train_losses[-1][1] / nr_households
             for p in self.model.parameters():
                 p.grad = p.grad / nr_households
-
             self.optimizer.step()
+
+            # Validation step
             if epoch == 1 or epoch % self.config.eval_steps == 0:
                 with torch.no_grad():
                     # y-pred from (H, N, L) -> (H * N, L)
@@ -103,9 +104,10 @@ class FederatedLearning:
 
             # Confusion matrix
             y_pred = y_pred.argmax(dim=1)
-            labels = ['AC', 'Dish washer', 'Washing Machine', 'Dryer', 'Water heater', 'TV', 'Microwave', 'Kettle',
-                      'Lighting', 'Refrigerator']
-            print(confusion_matrix(y_test, y_pred, labels=labels))
+            # labels = ['AC', 'Dish washer', 'Washing Machine', 'Dryer', 'Water heater', 'TV', 'Microwave', 'Kettle',
+            #           'Lighting', 'Refrigerator']
+            # print(confusion_matrix(y_test, y_pred, labels=labels))  # TODO need to use labels also in vectors
+            print(confusion_matrix(y_test, y_pred))
             print("--------------------")
 
             # Metrics
@@ -125,3 +127,5 @@ class FederatedLearning:
             print("Precision (macro): ", round(precision_macro, 4))
             print("Recall (macro):    ", round(recall_macro, 4))
             print("F1 Score (macro):  ", round(f1_macro, 4))
+
+        # TODO add plotting of results
