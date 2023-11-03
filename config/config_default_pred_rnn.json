@@ -1,0 +1,16 @@
+{
+    "mode": "prediction",
+    "test_size": 0.2,
+    "val_size": 0.1,
+    "shuffle": true,
+    "seed": 42,
+    "model": "RNN",
+    "input_dim": 96,
+    "hidden_dim": 128,
+    "output_dim": 10,
+    "num_layers": 1,
+    "dropout": 0.0,
+    "epochs": 300,
+    "lr": 0.3,
+    "batch_size": 128
+}
