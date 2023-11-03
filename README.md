@@ -6,6 +6,10 @@ Mandatory assignment 2 for Artificial Intelligence for Energy Informatics.
 
 [**Assignment**](https://drive.google.com/file/d/17nJ7HWbZPYZQXsJxbWggvyT49YTZW_M-/view) | Deadline 12.11.2023 kl 23:59
 
+## TODO
+* add plot of predicted and true test data as demanded in instructions (task1/prediction)
+* hyperparameter tuning (i.p. classification for lstm not converging yet)
+
 
 ## Setup
 ### Environment
@@ -40,7 +44,7 @@ Simply execute [main.ipynb](main.ipynb)
 ## Run via shell
 Execute in root:
 ```bash
-python .\src\debug.py
+python -m src
 ```
 
 ## Useful tutorials
