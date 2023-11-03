@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-import torch
 import json
 
 
@@ -26,6 +25,13 @@ class Config:
     epochs: int = 1000
     lr: float = 0.01
     batch_size: int = 128
+    eval_steps: int = 50
+
+    def __post_init__(self):
+        if self.mode.lower() == "classification":
+            self.input_dim = 96
+            self.hidden_dim = 128
+            self.output_dim = 10
 
     def __str__(self):
         attributes = ["CONFIG:"] + [f"{name}: {value}" for name, value in self.__dict__.items()]
