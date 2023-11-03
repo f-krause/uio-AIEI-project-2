@@ -1,4 +1,7 @@
+numpy~=1.21.5
 pandas
-openpyxl
 tqdm
-scikit-learn
+torch
+scikit-learn~=1.0.2
+matplotlib~=3.5.1
+dataclasses~=0.8
