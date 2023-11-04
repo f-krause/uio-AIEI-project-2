@@ -8,7 +8,7 @@ STACKED = True  # aggregate all households to one
 def main():
     kwargs = {
         # Main mode
-        "mode": "prediction",  # prediction or classification
+        "mode": "classification",  # prediction or classification
 
         # Model config
         "model": "RNN",  # LSTM or RNN

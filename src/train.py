@@ -2,11 +2,14 @@ import time
 import numpy as np
 import torch
 from matplotlib import pyplot as plt
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, \
-    ConfusionMatrixDisplay
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, ConfusionMatrixDisplay
 
 from src.config import Config
 from src.models import LSTMPred, RNNPred, LSTMClass, RNNClass
+
+
+LABELS = ['AC', 'Dish washer', 'Washing Machine', 'Dryer', 'Water heater', 'TV', 'Microwave', 'Kettle',
+          'Lighting', 'Refrigerator']
 
 
 class FederatedLearning:
@@ -139,10 +142,11 @@ class FederatedLearning:
             if return_matrix:
                 return cm
             else:
-                labels = ['AC', 'Dish washer', 'Washing Machine', 'Dryer', 'Water heater', 'TV', 'Microwave', 'Kettle',
-                          'Lighting', 'Refrigerator']
-                cm_display = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=labels)
+                plt.rcParams["figure.figsize"] = (8, 8)
+                cm_display = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=LABELS)
                 cm_display.plot()
+                plt.xticks(rotation=90)
+                plt.tight_layout()
                 plt.show()
         else:
             print("Warning: no confusion matrix for regression tasks!")
@@ -158,24 +162,10 @@ class FederatedLearning:
         elif self.config.mode.lower() == "classification":
             y = y.long().squeeze()
             test_loss = self.criterion(y_pred, y).item()
+            print("  Test cross entropy:", round(test_loss, 4))
 
             # Metrics
             y_pred = y_pred.argmax(dim=1)
-            accuracy = accuracy_score(y, y_pred)
-            precision_micro = precision_score(y, y_pred, average='micro', zero_division=np.nan)
-            recall_micro = recall_score(y, y_pred, average='micro', zero_division=np.nan)
-            f1_micro = f1_score(y, y_pred, average='micro', zero_division=np.nan)
-
-            precision_macro = precision_score(y, y_pred, average='macro', zero_division=np.nan)
-            recall_macro = recall_score(y, y_pred, average='macro', zero_division=np.nan)
-            f1_macro = f1_score(y, y_pred, average='macro', zero_division=np.nan)
-            print("  Test cross entropy:", round(test_loss, 4))
-            print("  Accuracy:          ", round(accuracy, 4))
-            print("  Precision (micro): ", round(precision_micro, 4))
-            print("  Recall (micro):    ", round(recall_micro, 4))
-            print("  F1 Score (micro):  ", round(f1_micro, 4))
-            print("  Precision (macro): ", round(precision_macro, 4))
-            print("  Recall (macro):    ", round(recall_macro, 4))
-            print("  F1 Score (macro):  ", round(f1_macro, 4))
+            print(classification_report(y, y_pred, target_names=LABELS))
 
         # TODO add plotting of results
