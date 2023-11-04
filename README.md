@@ -1,6 +1,6 @@
 # Assignment 2 - IN5460
 
-Felix Krause, Johannes Spieß, Sina Henning
+Felix Krause, Johannes Spies, Sina Henning
 
 Mandatory assignment 2 for Artificial Intelligence for Energy Informatics.
 
