@@ -39,7 +39,11 @@ Attention! There are two links to datasets in the docs. We are using the one whi
 
 
 ## Run via jupyter notebook
-Simply execute [main.ipynb](main.ipynb)
+Simply execute the respective notebooks:
+* [task1_prediction_RNN.ipynb](task1_prediction_RNN.ipynb)
+* [task1_prediction_LSTM.ipynb](task1_prediction_LSTM.ipynb)
+* [task2_classification_RNN.ipynb](task2_classification_RNN.ipynb)
+* [task2_classification_LSTM.ipynb](task2_classification_LSTM.ipynb)
 
 ## Run via shell
 Execute in root:
