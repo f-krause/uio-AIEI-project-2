@@ -8,10 +8,10 @@ STACKED = True  # aggregate all households to one
 def main():
     kwargs = {
         # Main mode
-        "mode": "classification",  # prediction or classification
+        "mode": "prediction",  # prediction or classification
 
         # Model config
-        "model": "LSTM",  # LSTM or RNN
+        "model": "RNN",  # LSTM or RNN
         # "hidden_dim": 32,
         "num_layers": 1,
         "dropout": 0.0,
@@ -33,5 +33,15 @@ def main():
 
     fl = FederatedLearning(config)
     fl.train(x_train, y_train, x_val, y_val)
+
+    # Plot image of train and validation loss
     # fl.plot_training_loss()
-    fl.evaluate(x_test, y_test)
+
+    # Plot image of train and validation accuracy
+    # fl.plot_training_accuracy()
+
+    # Print evaluation metrics
+    fl.evaluation_metrics(x_test, y_test)
+
+    # Plot
+    print(fl.plot_confusion_matrix(x_test, y_test, return_matrix=True))
