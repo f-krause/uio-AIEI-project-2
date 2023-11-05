@@ -153,19 +153,21 @@ class FederatedLearning:
 
     def evaluation_metrics(self, x, y):
         self.model.eval()
-        y_pred = self.model(x.reshape(-1, x.shape[-1]))
-        y = y.reshape(-1, 1)
-        print("METRICS:")
-        if self.config.mode.lower() == "prediction":
-            print("  Test MSE:", self.criterion(y, y_pred).item())
+        with torch.no_grad():
+            y_pred = self.model(x.reshape(-1, x.shape[-1]))
+            y = y.reshape(-1, 1)
+            print("METRICS:")
+            if self.config.mode.lower() == "prediction":
+                print("  Test MSE:", self.criterion(y, y_pred).item())
+                return y_pred
 
-        elif self.config.mode.lower() == "classification":
-            y = y.long().squeeze()
-            test_loss = self.criterion(y_pred, y).item()
-            print("  Test cross entropy:", round(test_loss, 4))
+            elif self.config.mode.lower() == "classification":
+                y = y.long().squeeze()
+                test_loss = self.criterion(y_pred, y).item()
+                print("  Test cross entropy:", round(test_loss, 4))
 
-            # Metrics
-            y_pred = y_pred.argmax(dim=1)
-            print(classification_report(y, y_pred, target_names=LABELS))
+                # Metrics
+                y_pred = y_pred.argmax(dim=1)
+                print(classification_report(y, y_pred, target_names=LABELS))
 
-        # TODO add plotting of results
+            # TODO add plotting of results
