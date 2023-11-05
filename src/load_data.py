@@ -27,3 +27,10 @@ def get_data(config: Config):
 
     # print([arr.shape for arr in [x_train, x_val, x_test, y_train, y_val, y_test]])
     return x_train, x_val, x_test, y_train, y_val, y_test
+
+def load_daily_consumptions(
+    path="./data/daily_consumptions.npz",
+):
+    daily_cons = np.load(path)["arr_0"]
+    assert daily_cons.ndim == 2
+    return daily_cons
