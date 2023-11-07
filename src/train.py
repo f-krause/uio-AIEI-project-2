@@ -161,7 +161,16 @@ class FederatedLearning:
             y = y.reshape(-1, 1)
             print("METRICS:")
             if self.config.mode.lower() == "prediction":
-                print("  Test MSE:", self.criterion(y, y_pred).item())
+                # create a mean model
+                mean_model = torch.mean(y) * torch.ones_like(y)
+                mean_mse = self.criterion(mean_model, y)
+                print("  Mean model Test MSE: ", mean_mse.item())
+                print("  Mean model Test RMSE:", mean_mse.sqrt().item())
+                
+                # print metrics of real model
+                mse = self.criterion(y_pred, y)
+                print("  Model Test MSE:      ", mse.item())
+                print("  Model Test RMSE:     ", mse.sqrt().item())
                 return y_pred
 
             elif self.config.mode.lower() == "classification":
