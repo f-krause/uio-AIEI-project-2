@@ -6,6 +6,7 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 
 from src.config import Config
 from src.models import LSTMPred, RNNPred, LSTMClass, RNNClass
+from src.load_data import load_daily_consumptions
 
 
 LABELS = ['AC', 'Dish washer', 'Washing Machine', 'Dryer', 'Water heater', 'TV', 'Microwave', 'Kettle',
@@ -171,3 +172,98 @@ class FederatedLearning:
                 print(classification_report(y, y_pred, target_names=LABELS))
 
             # TODO add plotting of results
+    
+    def _get_daily_consumption_predictions(self):
+        # load daily consumption data and put it into a tensor
+        daily_cons = load_daily_consumptions()
+        with torch.no_grad():
+            daily_cons = torch.from_numpy(daily_cons).float()
+        
+        # get predictions from window values
+        with torch.no_grad():
+            # create windows
+            windows, ground_truths = [], []
+            window_size = 7
+            time_ix = torch.arange(window_size, daily_cons.shape[1] - 1)
+            for i in time_ix:
+                window = daily_cons[:, i-window_size:i]
+                windows.append(window)
+                ground_truths.append(daily_cons[:, i])
+            windows = torch.stack(windows)
+            windows = windows.transpose(1, 0) # move household dimension to front
+
+            # predict samples for windows (for that, the first two dimensions of the 
+            # window tensor need to be combined such that we get a matrix instead of a 
+            # 3-tensor)
+            predictions = self.model(windows.reshape(-1, window_size)).reshape(*windows.shape[:2])
+            ground_truths = torch.stack(ground_truths)
+            ground_truths = ground_truths.transpose(1, 0) # move household dimension to front
+        
+        return daily_cons, windows, predictions, ground_truths, time_ix
+
+    def plot_daily_consumption_prediction(self, num_households = 5):
+        """
+        Plot the prediction of the model given the previous week ground truth
+        values as input.
+
+        Args:
+            num_households: Number of households to plot
+        """
+        daily_cons, _, predictions, _, time_ix = self._get_daily_consumption_predictions()
+        
+        # plot predictions vs. groundtruths
+        plt.figure(figsize=(6,3 * num_households))
+        for h in range(num_households):
+            plt.subplot(num_households, 1, h + 1)
+            plt.xlim(0, daily_cons.shape[1])
+            plt.grid(True)
+            plt.title("daily consumption prediction for household %d" % h)
+
+            # print ground truth and prediction
+            plt.plot(daily_cons[h], label="ground truth")
+            plt.plot(time_ix, predictions[h], label="prediction")
+
+            plt.legend()
+        plt.tight_layout()
+
+    def plot_recursive_time_evolution(
+        self,
+        household_idx: int = 0,
+        start_points: list[int] = None,
+        num_steps: int = 20,
+    ):
+        """
+        Create plots underneath each other that contain a recursive time
+        evolution from given start points.
+
+        Args:
+            household_idx: Household for which the simulation should be ran.
+            start_points: List of points to start the simulation from.
+            num_steps: How many steps should be simulated.
+        """
+
+        if start_points is None:
+            # use a default value, if there was none supplied
+            start_points = [0, 100, 200]
+
+        daily_cons, windows, _, _, time_ix = self._get_daily_consumption_predictions()
+
+        # select the household
+        daily_cons, windows = daily_cons[household_idx], windows[household_idx]
+
+        # run simulation and plot results
+        fig, axs = plt.subplots(nrows=len(start_points), figsize=(6, 2 * len(start_points)), sharex=True)
+        for start_idx, ax in zip(start_points, axs):
+            window = windows[start_idx]
+            completion = [w.item() for w in window]
+            with torch.no_grad():
+                for _ in range(num_steps):
+                    pred = self.model(torch.tensor(completion[-7:])[None,:])
+                    completion.append(pred.item())
+            ax.grid(True)
+            ax.plot(torch.arange(len(window) - 1, len(completion)), completion[len(window) - 1:], label="prediction", c="k", marker="o")
+            ax.plot(daily_cons[start_idx:start_idx+len(completion)], label="ground truth", ls=":", c="k")
+            ax.axvline(len(window) - 1, c="k", ls="--", label="start of prediction")
+            ax.set_title("start of prediction: day {}".format(time_ix[start_idx]))
+        fig.legend(*ax.get_legend_handles_labels())
+        fig.tight_layout()
