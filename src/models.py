@@ -14,9 +14,9 @@ class BaseModel(nn.Module):
             input_dim = self.hidden_dim
         self.hidden_dim = config.hidden_dim
         self.fc = nn.Sequential(
-            nn.Linear(input_dim, 50),
+            nn.Linear(input_dim, 100),
             nn.ReLU(),
-            nn.Linear(50, config.output_dim)
+            nn.Linear(100, config.output_dim)
         )
 
     @abstractmethod
