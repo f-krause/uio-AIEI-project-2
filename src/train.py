@@ -53,6 +53,7 @@ class FederatedLearning:
         start_time = time.time()
         print("TRAIN:")
         for epoch in range(1, self.config.epochs + 1):
+            self.model.train()
             self.optimizer.zero_grad()
             self.train_losses.append([epoch, 0.])
 
@@ -77,6 +78,7 @@ class FederatedLearning:
 
             # Validation step
             if epoch == 1 or epoch % self.config.eval_steps == 0:
+                self.model.eval()
                 with torch.no_grad():
                     # y-pred from (H, N, L) -> (H * N, L)
                     y_val_pred = self.model(x_val.reshape(-1, x_val.shape[-1]))
@@ -180,6 +182,7 @@ class FederatedLearning:
             daily_cons = torch.from_numpy(daily_cons).float()
         
         # get predictions from window values
+        self.model.eval()
         with torch.no_grad():
             # create windows
             windows, ground_truths = [], []
