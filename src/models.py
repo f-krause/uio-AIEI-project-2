@@ -8,13 +8,12 @@ from src.config import Config
 class BaseModel(nn.Module):
     """Abstract class to inherit from"""
 
-    def __init__(self, config: Config, input_dim: int = None):
+    def __init__(self, config: Config):
         super().__init__()
-        if input_dim is None:
-            input_dim = self.hidden_dim
         self.hidden_dim = config.hidden_dim
+        head_input_dim = config.num_layers * config.hidden_dim
         self.fc = nn.Sequential(
-            nn.Linear(input_dim, 100),
+            nn.Linear(head_input_dim, 100),
             nn.ReLU(),
             nn.Linear(100, config.output_dim)
         )
@@ -27,10 +26,7 @@ class BaseModel(nn.Module):
 
 class LSTMPred(BaseModel):
     def __init__(self, config: Config):
-        super().__init__(
-            config,
-            input_dim=config.hidden_dim * config.num_layers,
-        )
+        super().__init__(config)
         self.num_layers = config.num_layers
         self.lstm = nn.LSTM(input_size=config.input_dim, hidden_size=config.hidden_dim, num_layers=config.num_layers,
                             dropout=config.dropout, batch_first=True)
@@ -44,10 +40,7 @@ class LSTMPred(BaseModel):
 
 class RNNPred(BaseModel):
     def __init__(self, config: Config):
-        super().__init__(
-            config,
-            input_dim=config.hidden_dim * config.num_layers,
-        )
+        super().__init__(config)
         self.num_layers = config.num_layers
         self.rnn = nn.RNN(input_size=config.input_dim, hidden_size=config.hidden_dim, num_layers=config.num_layers,
                           dropout=config.dropout, nonlinearity='relu', batch_first=True)
