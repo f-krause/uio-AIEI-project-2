@@ -1,6 +1,6 @@
 # Assignment 2 - IN5460
 
-Felix Krause, Johannes Spieß, Sina Henning
+Felix Krause, Johannes Spies, Sina Henning
 
 Mandatory assignment 2 for Artificial Intelligence for Energy Informatics.
 
@@ -40,10 +40,10 @@ Attention! There are two links to datasets in the docs. We are using the one whi
 
 ## Run via jupyter notebook
 Simply execute the respective notebooks:
-* [task1_prediction_RNN.ipynb](task1_prediction_RNN.ipynb)
-* [task1_prediction_LSTM.ipynb](task1_prediction_LSTM.ipynb)
-* [task2_classification_RNN.ipynb](task2_classification_RNN.ipynb)
-* [task2_classification_LSTM.ipynb](task2_classification_LSTM.ipynb)
+* [task1.1_prediction_RNN.ipynb](task1.1_prediction_RNN.ipynb)
+* [task1.2_prediction_LSTM.ipynb](task1.2_prediction_LSTM.ipynb)
+* [task2.1_2.2_classification_RNN.ipynb](task2.1_2.2_classification_RNN.ipynb)
+* [task2.3_classification_LSTM.ipynb](task2.3_classification_LSTM.ipynb)
 
 ## Run via shell
 Execute in root:

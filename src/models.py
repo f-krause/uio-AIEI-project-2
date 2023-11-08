@@ -11,7 +11,12 @@ class BaseModel(nn.Module):
     def __init__(self, config: Config):
         super().__init__()
         self.hidden_dim = config.hidden_dim
-        self.fc = nn.Linear(self.hidden_dim, config.output_dim)
+        head_input_dim = config.num_layers * config.hidden_dim
+        self.fc = nn.Sequential(
+            nn.Linear(head_input_dim, 100),
+            nn.ReLU(),
+            nn.Linear(100, config.output_dim)
+        )
 
     @abstractmethod
     def forward(self, x):
@@ -22,26 +27,28 @@ class BaseModel(nn.Module):
 class LSTMPred(BaseModel):
     def __init__(self, config: Config):
         super().__init__(config)
+        self.num_layers = config.num_layers
         self.lstm = nn.LSTM(input_size=config.input_dim, hidden_size=config.hidden_dim, num_layers=config.num_layers,
                             dropout=config.dropout, batch_first=True)
 
     def forward(self, x):
         # input should be (N, L, H_in) => (B, L, 1) since batch_first=True and nr_channels = 1
         _, (h_out, _) = self.lstm(x.unsqueeze(-1))
-        out = self.fc(h_out.view(-1, self.hidden_dim))
+        out = self.fc(h_out.view(-1, self.num_layers * self.hidden_dim))
         return out
 
 
 class RNNPred(BaseModel):
     def __init__(self, config: Config):
         super().__init__(config)
+        self.num_layers = config.num_layers
         self.rnn = nn.RNN(input_size=config.input_dim, hidden_size=config.hidden_dim, num_layers=config.num_layers,
-                          dropout=config.dropout, batch_first=True)
+                          dropout=config.dropout, nonlinearity='relu', batch_first=True)
 
     def forward(self, x):
         # input should be (N, L, H_in) => (B, L, 1) since batch_first=True and nr_channels = 1
         _, h_out = self.rnn(x.unsqueeze(-1))
-        out = self.fc(h_out.view(-1, self.hidden_dim))
+        out = self.fc(h_out.view(-1, self.num_layers * self.hidden_dim))
         return out
 
 

@@ -44,10 +44,11 @@ class Config:
         print(f"Config saved in: {path}")
 
 
-def load_train_config(config_name) -> Config:
+def load_train_config(config_name, chatty=True) -> Config:
     path = f"config/{config_name}.json"
     with open(path, 'r') as json_file:
         json_data = json.load(json_file)
     config = Config(**json_data)
-    print(f"Config loaded from: {path}")
+    if chatty:
+        print(f"Config loaded from: {path}")
     return config
