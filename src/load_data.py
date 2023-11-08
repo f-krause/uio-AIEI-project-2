@@ -6,7 +6,12 @@ from src.config import Config
 
 
 def get_data(config: Config, return_index: bool = False):
-    # x has the format (num households H, observations N, input dim L)
+    """Load data and split into train/validation/test sets
+
+    Args:
+        config: Config object with data loading parameters
+        return_index: whether to return the indices of the train/validation/test sets
+    """
     if config.mode.lower() == "prediction":
         data = np.load("data/task1_data.npz")
     elif config.mode.lower() == "classification":
@@ -14,6 +19,7 @@ def get_data(config: Config, return_index: bool = False):
     else:
         raise NotImplementedError("mode must be 'prediction' or 'classification'")
 
+    # x has the format (num households H, observations N, input dim L)
     # move household dimension back for sampling
     x = data["x"].transpose(1, 0, 2)
     y = data["y"].transpose(1, 0)
@@ -39,6 +45,7 @@ def get_data(config: Config, return_index: bool = False):
     # print([arr.shape for arr in [x_train, x_val, x_test, y_train, y_val, y_test]])
     splits = x_train, x_val, x_test, y_train, y_val, y_test
     indices = train_ix, val_ix, test_ix
+
     if return_index:
         return x, y, splits, indices
     else:

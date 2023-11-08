@@ -31,12 +31,20 @@ class FederatedLearning:
             elif self.config.model.lower() == "rnn":
                 self.model = RNNClass(self.config)
             self.criterion = torch.nn.CrossEntropyLoss()  # cross entropy loss for classification
-            self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.config.lr)
+            self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.config.lr)  # TODO try Adam for classification
         else:
             raise NotImplementedError("mode must be 'prediction' or 'classification'")
 
     def train(self, x_train, y_train, x_val, y_val):
-        # x_train: (H: num households, N: number of train samples, L: sequence length)
+        """Train the model on the given data.
+
+        Args:
+            x_train: training data of dimension (H: num households, N: number of train samples, L: sequence length)
+            y_train: training labels of dimension (H: num households, N: number of train samples)
+            x_val: validation data similar to x_train
+            y_val: validation data similar to y_train
+        """
+
         self.train_losses, self.val_losses = [], []
         self.train_accs, self.val_accs = [], []
         nr_samples = x_train.shape[1]
@@ -102,9 +110,11 @@ class FederatedLearning:
         print("  Needed  %1.2f minutes for training" % ((time.time() - start_time) / 60))
 
     def predict(self, x):
+        """Get the prediction of the model for input x"""
         return self.model(x.reshape(-1, x.shape[-1]))
 
     def plot_training_loss(self):
+        """Plot the training loss of training"""
         plt.rcParams["figure.figsize"] = (10, 6)
         plt.plot(*zip(*self.train_losses), label="training loss")
         plt.plot(*zip(*self.val_losses), label="validation loss")
@@ -118,6 +128,7 @@ class FederatedLearning:
         plt.show()
 
     def plot_training_accuracy(self):
+        """Plot the training and validation accuracy of training for classification tasks."""
         if self.config.mode == "prediction":
             return "Warning: no training accuracy for regression tasks!"
 
@@ -134,6 +145,7 @@ class FederatedLearning:
         plt.show()
 
     def plot_confusion_matrix(self, x, y, return_matrix=False):
+        """Plot or return confusion matrix for classification task"""
         if self.config.mode == "prediction":
             return "Warning: no confusion matrix for regression tasks!"
 
@@ -153,6 +165,7 @@ class FederatedLearning:
             plt.show()
 
     def evaluation_metrics(self, x, y):
+        """Print loss and for classification a metrics overview """
         self.model.eval()
         with torch.no_grad():
             y_pred = self.model(x.reshape(-1, x.shape[-1]))
