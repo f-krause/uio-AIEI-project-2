@@ -1,12 +1,10 @@
 import time
-import numpy as np
 import torch
 from matplotlib import pyplot as plt
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, ConfusionMatrixDisplay
 
 from src.config import Config
 from src.models import LSTMPred, RNNPred, LSTMClass, RNNClass
-from src.load_data import load_daily_consumptions
 
 
 LABELS = ['AC', 'Dish washer', 'Washing Machine', 'Dryer', 'Water heater', 'TV', 'Microwave', 'Kettle',
@@ -120,39 +118,39 @@ class FederatedLearning:
         plt.show()
 
     def plot_training_accuracy(self):
-        if self.config.mode == "classification":
-            plt.rcParams["figure.figsize"] = (10, 6)
-            plt.plot(*zip(*self.train_accs), label="train accuracy")
-            plt.plot(*zip(*self.val_accs), label="validation accuracy")
-            plt.title("Train and Validation Accuracy while Training")
-            plt.xlabel("epochs")
-            if self.config.mode.lower() == "prediction":
-                plt.ylabel("MSE")
-            elif self.config.mode.lower() == "classification":
-                plt.ylabel("cross entropy")
-            plt.legend()
-            plt.show()
-        else:
-            print("Warning: no training accuracy for regression tasks!")
+        if self.config.mode == "prediction":
+            return "Warning: no training accuracy for regression tasks!"
+
+        plt.rcParams["figure.figsize"] = (10, 6)
+        plt.plot(*zip(*self.train_accs), label="train accuracy")
+        plt.plot(*zip(*self.val_accs), label="validation accuracy")
+        plt.title("Train and Validation Accuracy while Training")
+        plt.xlabel("epochs")
+        if self.config.mode.lower() == "prediction":
+            plt.ylabel("MSE")
+        elif self.config.mode.lower() == "classification":
+            plt.ylabel("cross entropy")
+        plt.legend()
+        plt.show()
 
     def plot_confusion_matrix(self, x, y, return_matrix=False):
-        if self.config.mode == "classification":
-            y = y.reshape(-1, 1).long().squeeze()
-            y_pred = self.model(x.reshape(-1, x.shape[-1]))
-            y_pred = y_pred.argmax(dim=1)
-            cm = confusion_matrix(y, y_pred)
+        if self.config.mode == "prediction":
+            return "Warning: no confusion matrix for regression tasks!"
 
-            if return_matrix:
-                return cm
-            else:
-                plt.rcParams["figure.figsize"] = (8, 8)
-                cm_display = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=LABELS)
-                cm_display.plot()
-                plt.xticks(rotation=90)
-                plt.tight_layout()
-                plt.show()
+        y = y.reshape(-1, 1).long().squeeze()
+        y_pred = self.model(x.reshape(-1, x.shape[-1]))
+        y_pred = y_pred.argmax(dim=1)
+        cm = confusion_matrix(y, y_pred)
+
+        if return_matrix:
+            return cm
         else:
-            print("Warning: no confusion matrix for regression tasks!")
+            plt.rcParams["figure.figsize"] = (8, 8)
+            cm_display = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=LABELS)
+            cm_display.plot()
+            plt.xticks(rotation=90)
+            plt.tight_layout()
+            plt.show()
 
     def evaluation_metrics(self, x, y):
         self.model.eval()
@@ -182,100 +180,54 @@ class FederatedLearning:
                 y_pred = y_pred.argmax(dim=1)
                 print(classification_report(y, y_pred, target_names=LABELS))
 
-            # TODO add plotting of results
-    
-    def _get_daily_consumption_predictions(self):
-        # load daily consumption data and put it into a tensor
-        daily_cons = load_daily_consumptions()
-        with torch.no_grad():
-            daily_cons = torch.from_numpy(daily_cons).float()
-        
-        # get predictions from window values
-        self.model.eval()
-        with torch.no_grad():
-            # create windows
-            windows, ground_truths = [], []
-            window_size = 7
-            time_ix = torch.arange(window_size, daily_cons.shape[1] - 1)
-            for i in time_ix:
-                window = daily_cons[:, i-window_size:i]
-                windows.append(window)
-                ground_truths.append(daily_cons[:, i])
-            windows = torch.stack(windows)
-            windows = windows.transpose(1, 0) # move household dimension to front
-
-            # predict samples for windows (for that, the first two dimensions of the 
-            # window tensor need to be combined such that we get a matrix instead of a 
-            # 3-tensor)
-            predictions = self.model(windows.reshape(-1, window_size)).reshape(*windows.shape[:2])
-            ground_truths = torch.stack(ground_truths)
-            ground_truths = ground_truths.transpose(1, 0) # move household dimension to front
-        
-        return daily_cons, windows, predictions, ground_truths, time_ix
-
-    def plot_daily_consumption_prediction(self, num_households = 5):
+    def plot_prediction_vs_label(self, x_full, y_full, train_idx, test_idx, val_idx=None, households: list = [0]):
         """
         Plot the prediction of the model given the previous week ground truth
         values as input.
 
         Args:
-            num_households: Number of households to plot
+            x_full: Full input data
+            y_full: Full target data
+            train_idx: Indices of training data
+            test_idx: Indices of test data
+            val_idx: Indices of validation data (optional)
+            households: List of indices of households to plot (0-49)
         """
-        daily_cons, _, predictions, _, time_ix = self._get_daily_consumption_predictions()
-        
-        # plot predictions vs. groundtruths
-        plt.figure(figsize=(6,3 * num_households))
-        for h in range(num_households):
-            plt.subplot(num_households, 1, h + 1)
-            plt.xlim(0, daily_cons.shape[1])
+        if self.config.mode == "classification":
+            return "Warning: no prediction plot for regression tasks!"
+
+        if not val_idx is None:
+            torch.cat((train_idx, val_idx), dim=0)
+
+        train_idx, test_idx = [arr.sort().values for arr in [train_idx, test_idx]]
+
+        # Create a subplot for each household and plot both y_pred and y_pred_test
+        plt.figure(figsize=(16, 4 * len(households)))
+        for h in households:
+            y_pred = self.predict(x_full[h][train_idx])
+            y_pred_test = self.predict(x_full[h][test_idx])
+
+            # Plot y_pred
+            plt.subplot(len(households), 2, 2 * h + 1)
+            plt.xlim(0, x_full.shape[1])
             plt.grid(True)
-            plt.title("daily consumption prediction for household %d" % h)
+            plt.title("Daily Consumption Prediction for Household %d \n(train + val data)" % h)
 
-            # print ground truth and prediction
-            plt.plot(daily_cons[h], label="ground truth")
-            plt.plot(time_ix, predictions[h], label="prediction")
-
-            plt.legend()
-        plt.tight_layout()
-
-    def plot_recursive_time_evolution(
-        self,
-        household_idx: int = 0,
-        start_points: list[int] = None,
-        num_steps: int = 20,
-    ):
-        """
-        Create plots underneath each other that contain a recursive time
-        evolution from given start points.
-
-        Args:
-            household_idx: Household for which the simulation should be ran.
-            start_points: List of points to start the simulation from.
-            num_steps: How many steps should be simulated.
-        """
-
-        if start_points is None:
-            # use a default value, if there was none supplied
-            start_points = [0, 100, 200]
-
-        daily_cons, windows, _, _, time_ix = self._get_daily_consumption_predictions()
-
-        # select the household
-        daily_cons, windows = daily_cons[household_idx], windows[household_idx]
-
-        # run simulation and plot results
-        fig, axs = plt.subplots(nrows=len(start_points), figsize=(6, 2 * len(start_points)), sharex=True)
-        for start_idx, ax in zip(start_points, axs):
-            window = windows[start_idx]
-            completion = [w.item() for w in window]
             with torch.no_grad():
-                for _ in range(num_steps):
-                    pred = self.model(torch.tensor(completion[-7:])[None,:])
-                    completion.append(pred.item())
-            ax.grid(True)
-            ax.plot(torch.arange(len(window) - 1, len(completion)), completion[len(window) - 1:], label="prediction", c="k", marker="o")
-            ax.plot(daily_cons[start_idx:start_idx+len(completion)], label="ground truth", ls=":", c="k")
-            ax.axvline(len(window) - 1, c="k", ls="--", label="start of prediction")
-            ax.set_title("start of prediction: day {}".format(time_ix[start_idx]))
-        fig.legend(*ax.get_legend_handles_labels())
-        fig.tight_layout()
+                plt.plot(train_idx + 6, y_full[h][train_idx], label="ground truth")
+                plt.plot(train_idx + 6, y_pred, label="prediction")
+            plt.legend()
+
+            # Plot y_pred_test
+            plt.subplot(len(households), 2, 2 * h + 2)
+            plt.xlim(0, x_full.shape[1])
+            plt.grid(True)
+            plt.title("Daily Consumption Prediction for Household %d \n(test data)" % h)
+
+            with torch.no_grad():
+                plt.plot(test_idx + 6, y_full[h][test_idx], label="ground truth", marker='o', linestyle='-',
+                         markersize=4)
+                plt.plot(test_idx + 6, y_pred_test, label="prediction", marker='o', linestyle='-', markersize=4)
+            plt.legend()
+
+        plt.tight_layout()
