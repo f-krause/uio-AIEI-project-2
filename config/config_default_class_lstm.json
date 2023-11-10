@@ -10,7 +10,7 @@
     "output_dim": 10,
     "num_layers": 1,
     "dropout": 0.0,
-    "epochs": 1400,
-    "lr": 0.3,
+    "epochs": 400,
+    "lr": 0.03,
     "batch_size": 128
 }

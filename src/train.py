@@ -16,6 +16,7 @@ class FederatedLearning:
         self.config = config
         self.train_losses, self.val_losses = None, None
         self.train_accs, self.val_accs = None, None
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.config.lr)
 
         if self.config.mode.lower() == "prediction":
             if self.config.model.lower() == "lstm":
@@ -23,7 +24,6 @@ class FederatedLearning:
             elif self.config.model.lower() == "rnn":
                 self.model = RNNPred(self.config)
             self.criterion = torch.nn.MSELoss()  # mean-squared error for regression
-            self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.config.lr)
 
         elif self.config.mode.lower() == "classification":
             if self.config.model.lower() == "lstm":
@@ -31,7 +31,7 @@ class FederatedLearning:
             elif self.config.model.lower() == "rnn":
                 self.model = RNNClass(self.config)
             self.criterion = torch.nn.CrossEntropyLoss()  # cross entropy loss for classification
-            self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.config.lr)  # TODO try Adam for classification
+
         else:
             raise NotImplementedError("mode must be 'prediction' or 'classification'")
 
