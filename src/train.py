@@ -107,7 +107,7 @@ class FederatedLearning:
                               (epoch, loss.item(), val_loss.item()))
                     self.val_losses.append([epoch, val_loss.item()])
 
-        print("  Needed  %1.2f minutes for training" % ((time.time() - start_time) / 60))
+        print("  Needed %1.2f minutes for training" % ((time.time() - start_time) / 60))
 
     def predict(self, x):
         """Get the prediction of the model for input x"""
