@@ -9,7 +9,7 @@ class Config:
 
     # Data
     test_size: float = 0.2
-    val_size: float = 0.1  # Note: this will be 0.1 of the remaining data after test split -> so 0.8 * 0.1 = 0.08
+    val_size: float = 0.125  # Note: this will be 0.125 of the training data after first split -> so 0.8 * 0.125 = 0.1
     shuffle: bool = True
     seed: int = 42
 
