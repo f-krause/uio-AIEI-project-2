@@ -5,16 +5,16 @@ import json
 @dataclass
 class Config:
     # Main mode
-    mode: str = "prediction"  # prediction or classification
+    mode: str = "prediction"  # prediction or classification supported
 
     # Data
     test_size: float = 0.2
-    val_size: float = 0.1
+    val_size: float = 0.1  # Note: this will be 0.1 of the remaining data after test split -> so 0.8 * 0.1 = 0.08
     shuffle: bool = True
     seed: int = 42
 
     # Model config
-    model: str = "LSTM"  # LSTM or RNN
+    model: str = "LSTM"  # LSTM or RNN supported
     input_dim: int = 1
     hidden_dim: int = 32
     output_dim: int = 1
