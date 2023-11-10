@@ -2,10 +2,11 @@ from src.load_data import get_data
 from src.train import FederatedLearning
 from src.config import Config
 
-STACKED = True  # aggregate all households to one
+STACKED = True  # aggregate data of all households to one (i.e., traditional learning)
 
 
 def main():
+    # Specify parameters
     kwargs = {
         # Main mode
         "mode": "classification",  # prediction or classification
@@ -22,15 +23,18 @@ def main():
         "batch_size": 128
     }
 
+    # Load as config
     config = Config(**kwargs)
     print(config)
     x_train, x_val, x_test, y_train, y_val, y_test = get_data(config)
 
     if STACKED:
+        # Aggregate data if specified
         x_train, x_val, x_test = [arr.reshape(1, arr.shape[0] * arr.shape[1], arr.shape[2]) for arr in
                                   [x_train, x_val, x_test]]
         y_train, y_val, y_test = [arr.reshape(1, arr.shape[0] * arr.shape[1]) for arr in [y_train, y_val, y_test]]
 
+    # Train model
     fl = FederatedLearning(config)
     fl.train(x_train, y_train, x_val, y_val)
 
@@ -43,5 +47,5 @@ def main():
     # Print evaluation metrics
     fl.evaluation_metrics(x_test, y_test)
 
-    # Plot
+    # Plot confusion matrix
     print(fl.plot_confusion_matrix(x_test, y_test, return_matrix=True))
