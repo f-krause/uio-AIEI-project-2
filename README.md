@@ -6,10 +6,6 @@ Mandatory assignment 2 for Artificial Intelligence for Energy Informatics.
 
 [**Assignment**](https://drive.google.com/file/d/17nJ7HWbZPYZQXsJxbWggvyT49YTZW_M-/view) | Deadline 12.11.2023 kl 23:59
 
-## TODO
-* add plot of predicted and true test data as demanded in instructions (task1/prediction)
-* hyperparameter tuning (i.p. classification for lstm not converging yet)
-
 
 ## Setup
 ### Environment
@@ -34,8 +30,11 @@ python -m ipykernel install --user --name=venv
 ```
 
 ### Data
-Place **[Dataset.csv:](https://zenodo.org/records/6778401)** in a directory called "data" 
+Place **[Dataset.csv:](https://zenodo.org/records/6778401)** in a directory called "data"
+
 Attention! There are two links to datasets in the docs. We are using the one which can be found on zenodo.org
+
+Run the [preprocessing notebook](task0_preprocessing.ipynb) to create the preprocessed datasets used later.
 
 
 ## Run via jupyter notebook
@@ -46,7 +45,7 @@ Simply execute the respective notebooks:
 * [task2.3_classification_LSTM.ipynb](task2.3_classification_LSTM.ipynb)
 
 ## Run via shell
-Execute in root:
+Adapt [main.py](src/main.py) to your needs and execute in project root:
 ```bash
 python -m src
 ```
