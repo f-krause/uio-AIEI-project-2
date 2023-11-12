@@ -1,7 +1,7 @@
-numpy~=1.21.5
+numpy
 pandas
 tqdm
 torch
 scikit-learn>=1.3.2
-matplotlib~=3.5.1
-dataclasses~=0.8
+matplotlib
+dataclasses
