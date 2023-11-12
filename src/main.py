@@ -26,7 +26,8 @@ def main():
     # Load as config
     config = Config(**kwargs)
     print(config)
-    x_train, x_val, x_test, y_train, y_val, y_test = get_data(config)
+    _, _, splits = get_data(config)
+    x_train, x_val, x_test, y_train, y_val, y_test = splits
 
     if STACKED:
         # Aggregate data if specified
@@ -37,6 +38,8 @@ def main():
     # Train model
     fl = FederatedLearning(config)
     fl.train(x_train, y_train, x_val, y_val)
+
+    ### ADAPT AS NEEDED BELOW ###
 
     # Plot image of train and validation loss
     # fl.plot_training_loss()
