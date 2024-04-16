@@ -1,4 +1,5 @@
 # Assignment 2 - IN5460
+## Federated Learning with RNNs and LSTMs
 
 Felix Krause, Johannes Spies, Sina Henning
 
