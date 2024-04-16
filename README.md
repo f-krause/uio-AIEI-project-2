@@ -6,6 +6,8 @@ Mandatory assignment 2 for Artificial Intelligence for Energy Informatics.
 
 [**Assignment**](https://drive.google.com/file/d/17nJ7HWbZPYZQXsJxbWggvyT49YTZW_M-/view) | Deadline 12.11.2023 kl 23:59
 
+![project7](https://github.com/f-krause/uio-AIEI-project-2/assets/93521294/854c632f-28c7-4c5f-8679-34694c5ff4ed)
+
 
 ## Setup
 ### Environment
